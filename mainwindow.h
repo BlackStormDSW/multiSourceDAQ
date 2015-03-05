@@ -23,6 +23,79 @@ class QSpacerItem;
 class QTextCodec;
 class QTimer;
 
+class InputData : public QObject
+{
+    Q_OBJECT
+public:
+    explicit InputData();
+    ~InputData();
+private:
+    Win_QextSerialPort *inputDataCOM;
+    QByteArray inputBuf;
+
+    QByteArray GDM_connect_cmd1, GDM_connect_cmd2,
+    GDM_connect_response1, GDM_connect_response2,
+    GDM_connect_done, GDM_connect_done_response,
+    GDM_switchto_dcv, GDM_switchto_dcv_done,
+    GDM_switchto_acv, GDM_switchto_acv_done, GDM_get_data;
+
+    int index;
+    double dataValue;
+
+    QString inputCOMName, dataSrc;
+
+    PortSettings *inputCOMSet;
+
+public:
+    bool valueFlag, beginFlag;
+
+private:
+    //初始化串口
+    void initInputCOM();
+
+    void updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr);
+
+public:
+    void setCOMName(QString COMName);
+    void setDataSrc(QString src);
+    double getData();
+    void init();
+    void run();
+
+    //初始化发送接收的GDM数据
+    void initGDMData();
+
+    void sendGDMData(Win_QextSerialPort *GDMCOM, QByteArray hexStr);
+
+public slots:
+    void readInputData();
+};
+
+class OutputData : public QObject
+{
+    Q_OBJECT
+public:
+    explicit OutputData();
+    ~OutputData();
+private:
+    PortSettings *outputCOMSet;
+    Win_QextSerialPort *outputDataCOM;
+
+    QString outputCOMName;
+    QByteArray data;
+public:
+private:
+    //初始化串口
+    void initOutputCOM();
+    void sendOutputData();
+public:
+    void setCOMName(QString COMName);
+    void setData(QByteArray data);
+    void init();
+    void run();
+private slots:
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -40,26 +113,14 @@ private slots:
 
     void on_startButton_clicked();
 
-    void readInputData();
-
-    void sendGDMData(Win_QextSerialPort *GDMCOM, QByteArray hexStr);
-
-    void sendOutputData();
-
-    //初始化串口
-    void initCOM();
+    void handleData();
 
 private:
     //初始化
     void init();
 
-    //初始化发送接收的GDM数据
-    void initGDMData();
-
     //选项卡的布局
     void layoutTabWidget();
-
-    void updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr, int idx);
 
     void display();
 
@@ -94,20 +155,11 @@ private:
 
     QSpacerItem *spacer1[CHANNELMAX], *spacer2[CHANNELMAX];
 
-    PortSettings *inputCOMSet[CHANNELMAX], *outputCOMSet;
-    Win_QextSerialPort *inputDataCOM[CHANNELMAX], *outputDataCOM;
+    InputData *inData[CHANNELMAX];
+
+    OutputData *outData;
 
     QByteArray data[CHANNELMAX];
-    QByteArray inputBuf[CHANNELMAX];
-
-    QByteArray GDM_connect_cmd1, GDM_connect_cmd2,
-    GDM_connect_response1, GDM_connect_response2,
-    GDM_connect_done, GDM_connect_done_response,
-    GDM_switchto_dcv, GDM_switchto_dcv_done,
-    GDM_switchto_acv, GDM_switchto_acv_done, GDM_get_data;
-
-    int index;
-    double dataValue;
 
     //接收与发送数据是否开始的标志
     bool runFlag;
@@ -115,9 +167,7 @@ private:
     //发送数据的定时器
     QTimer *timer;
 
-    QTextCodec *codec;    
-
-    bool valueFlag, beginFlag;
+    QTextCodec *codec;
 };
 
 #endif // MAINWINDOW_H
