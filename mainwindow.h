@@ -21,6 +21,7 @@ class QComboBox;
 class QLineEdit;
 class QSpacerItem;
 class QTextCodec;
+class QTimer;
 
 class MainWindow : public QMainWindow
 {
@@ -45,30 +46,33 @@ private slots:
 
     void sendOutputData();
 
+    //初始化串口
+    void initCOM();
+
 private:
     //初始化
     void init();
 
+    //初始化发送接收的GDM数据
+    void initGDMData();
+
     //选项卡的布局
     void layoutTabWidget();
 
-    //初始化串口
-    void initCOM();
-
-    void updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr);
+    void updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr, int idx);
 
     void display();
 
-    //运行前检查所有项
-    void checkAll();
+    //初始化配置
+    void initConfig();
 
-    //运行前，检查串口是否正确，是否有冲突
-    void checkCOM();
+    //运行接收数据与发送数据
+    void dataRun();
 
 private:
     Ui::MainWindow *ui;
     /*defaultConfig:默认配置；customConfig：自定义配置*/
-    QSettings *defaultConfig, *customConfig;
+    QSettings *defaultConfig, *customConfig, *config;
     /*
     channelCount            ：当前通道数目；
     outputCOM               ：输出端口号(所有输入端口汇入同一个输出端口);
@@ -96,10 +100,24 @@ private:
     QByteArray data[CHANNELMAX];
     QByteArray inputBuf[CHANNELMAX];
 
+    QByteArray GDM_connect_cmd1, GDM_connect_cmd2,
+    GDM_connect_response1, GDM_connect_response2,
+    GDM_connect_done, GDM_connect_done_response,
+    GDM_switchto_dcv, GDM_switchto_dcv_done,
+    GDM_switchto_acv, GDM_switchto_acv_done, GDM_get_data;
+
     int index;
     double dataValue;
 
-    QTextCodec *codec;
+    //接收与发送数据是否开始的标志
+    bool runFlag;
+
+    //发送数据的定时器
+    QTimer *timer;
+
+    QTextCodec *codec;    
+
+    bool valueFlag, beginFlag;
 };
 
 #endif // MAINWINDOW_H
