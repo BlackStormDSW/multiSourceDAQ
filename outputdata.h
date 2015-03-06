@@ -20,6 +20,8 @@ private:
 
     QTimer *timer;
 
+    bool valueFlag, beginFlag;
+
 public:
     //初始化串口
     void initOutputCOM();

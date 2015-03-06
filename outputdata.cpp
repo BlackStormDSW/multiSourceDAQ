@@ -15,7 +15,6 @@ OutputData::~OutputData()
 
 void OutputData::initOutputCOM()
 {
-    qDebug () << "outputCOMName: " << outputCOMName;
     outputCOMSet = new PortSettings();
     outputCOMSet->BaudRate = OUTPUTRATE;
     outputCOMSet->Parity = PAR_NONE;
@@ -34,7 +33,6 @@ void OutputData::initOutputCOM()
 
 void OutputData::sendOutputData()
 {
-    qDebug() << "OOOOOOOOOOOOOOOOOOOOOO: " << data;
     outputDataCOM->write(data, data.length());
 }
 

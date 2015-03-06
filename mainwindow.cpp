@@ -75,11 +75,9 @@ void MainWindow::on_countChnSpinBox_valueChanged(int)
 void MainWindow::on_startButton_clicked()
 {
     dataRun();
-    qDebug () << "after dataRun";
 
     if (true == runFlag)
     {
-        qDebug () << "true == runFlag";
         for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
         {
             inData[i] = new InputData();
@@ -91,13 +89,9 @@ void MainWindow::on_startButton_clicked()
                 inData[i]->run();
             }
         }
-        qDebug () << "11111111111111111";
         outData = new OutputData;
-        qDebug () << "22222222222222222";
         outData->setCOMName(ui->outPutPortComboBox->currentText());
-        qDebug () << "33333333333333333";
         outData->initOutputCOM();
-        qDebug () << "44444444444444444";
     }
 }
 
@@ -107,14 +101,13 @@ void MainWindow::handleData()
     for(int i = 0; i < ui->countChnSpinBox->value(); i ++)
     {
         dataStr.setNum(inData[i]->getData());
-        qDebug() << "handleData " << dataStr;
 
         sendBuf.append(dataStr);
         if (i < ui->countChnSpinBox->value()-1)
             sendBuf.append(",");
     }
     sendBuf.append("E");
-    qDebug() << "the result: " << sendBuf.data();
+//    qDebug() << "the result: " << sendBuf.data();
     outData->setData(sendBuf);
 }
 
@@ -232,8 +225,6 @@ void MainWindow::initConfig()
 
 void MainWindow::dataRun()
 {
-    qDebug() << "data run";
-
     runFlag = !runFlag;
     bool checkOk = true;
 
@@ -266,9 +257,7 @@ void MainWindow::dataRun()
             }
             if (false == checkOk)
                 break;
-            qDebug() << "index " << i << " : " << "inputCOMBox[i]->currentText(): " << inputCOMBox[i]->currentText();
         }
-        qDebug() << "before time start!";
 
         timer->start(500);
 
@@ -277,6 +266,7 @@ void MainWindow::dataRun()
         {
             delete inData[i];
         }
+        delete outData;
         timer->stop();
     }
 }

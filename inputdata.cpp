@@ -38,15 +38,13 @@ void InputData::initGDMData()
 void InputData::readInputData()
 {
     inputBuf = inputDataCOM->readAll();
-//    qDebug() << " data: " << inputBuf.data();
-    qDebug() << " data: " << inputBuf.toHex();
-//    qDebug() << " data: " << QByteArray::fromHex(inputBuf.data());
+//    qDebug() << " data: " << inputBuf.toHex();
     updateInputData(inputDataCOM, inputBuf.toHex());
 }
 
 void InputData::sendGDMData(Win_QextSerialPort *GDMCOM, QByteArray hexStr)
 {
-    qDebug() << "sendGDMData: " << hexStr.data();
+//    qDebug() << "sendGDMData: " << hexStr.data();
     GDMCOM->write(hexStr, hexStr.length());
 }
 
@@ -71,11 +69,11 @@ void InputData::updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr)
 
     if (!hexStr.isEmpty())
     {
-        qDebug() << QString("valueFlag:%1, beginFlag:%2").arg(valueFlag).arg(beginFlag);
+//        qDebug() << QString("valueFlag:%1, beginFlag:%2").arg(valueFlag).arg(beginFlag);
 
         if(QStringLiteral("三和数显指示表") == dataSrc)
         {
-            qDebug() << "Hex str: " << hexStr.mid(0,2);
+//            qDebug() << "Hex str: " << hexStr.mid(0,2);
             if ("aa" == hexStr.mid(0,2) || "AA" == hexStr.mid(0,2))
             {
                 index = 0;
@@ -93,11 +91,10 @@ void InputData::updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr)
                 }
                 ++ index;
             }
-            qDebug() << "updateInputData data value : " << dataValue;
+//            qDebug() << "updateInputData data value : " << dataValue;
         }
         else //(QStringLiteral("固纬数字万用表") == dataSrc)
         {
-            qDebug() << QString("valueFlag:%1, beginFlag:%2").arg(valueFlag).arg(beginFlag);
             if (true == valueFlag && (qstrncmp(GDM_connect_done_response.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_connect_done_response.data())-1)))
             {
                 dataValue = QByteArray::fromHex(hexStr).split(',')[0].toDouble();
@@ -108,33 +105,31 @@ void InputData::updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr)
                 if (false == beginFlag)
                 {
                     sendGDMData(dataCOM, GDM_connect_cmd1.data());
-                    qDebug() << "GDM_connect_cmd1:" << GDM_connect_cmd1.data();
+//                    qDebug() << "GDM_connect_cmd1:" << GDM_connect_cmd1.data();
                 }
-                qDebug() << " gw hex Str : " << QByteArray::fromHex(hexStr).data() << " GDM_CONNECT_RESPONSE1: " << GDM_connect_response1.data();
                 if (!qstrncmp(GDM_connect_response1.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_connect_response1.data())-1))
                 {
                     beginFlag = true;
                     sendGDMData(dataCOM, GDM_connect_cmd2.data());
-                    qDebug() << "GDM_connect_cmd2: " << GDM_connect_cmd2.data();
+//                    qDebug() << "GDM_connect_cmd2: " << GDM_connect_cmd2.data();
                 } else if (!qstrncmp(GDM_connect_response2.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_connect_response2.data())-1)) {
-                    qDebug() << "GDM_connect_response2: " << GDM_connect_response2.data();
+//                    qDebug() << "GDM_connect_response2: " << GDM_connect_response2.data();
                     sendGDMData(dataCOM, GDM_connect_done.data());
-                    qDebug() << "GDM_connect_done: " << GDM_connect_done.data();
                 } else if (!qstrncmp(GDM_connect_done_response.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_connect_done_response.data())-1)){
                     valueFlag = true;
+//                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
                     sendGDMData(dataCOM, GDM_get_data.data());
-                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
                 } else if (!qstrncmp(GDM_switchto_dcv_done.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_switchto_dcv_done.data())-1)) {
                     valueFlag = true;
-                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
+//                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
                     sendGDMData(dataCOM, GDM_get_data.data());
                 } else if (!qstrncmp(GDM_switchto_acv_done.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_switchto_acv_done.data())-1)) {
                     valueFlag = true;
+//                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
                     sendGDMData(dataCOM, GDM_get_data.data());
-                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
                 } else {
+//                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
                     sendGDMData(dataCOM, GDM_get_data.data());
-                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
                 }
             }
         }
@@ -153,7 +148,6 @@ void InputData::setDataSrc(QString src)
 
 double InputData::getData()
 {
-    qDebug() << "data value is : " << dataValue;
     return dataValue;
 }
 

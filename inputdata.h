@@ -29,7 +29,6 @@ private:
 
     PortSettings *inputCOMSet;
 
-public:
     bool valueFlag, beginFlag;
 
 private:
