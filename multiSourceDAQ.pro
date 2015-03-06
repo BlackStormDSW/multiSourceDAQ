@@ -14,20 +14,22 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    multisrcdaq.cpp \
     qextserialbase.cpp \
     qextserialport.cpp \
     win_qextserialport.cpp \
     readdata.cpp \
-    senddata.cpp
+    senddata.cpp \
+    inputdata.cpp \
+    outputdata.cpp
 
 HEADERS  += mainwindow.h \
-    multisrcdaq.h \
     qextserialbase.h \
     qextserialport.h \
     win_qextserialport.h \
     readdata.h \
     senddata.h \
-    dataprotocol.h
+    dataprotocol.h \
+    inputdata.h \
+    outputdata.h
 
 FORMS    += mainwindow.ui

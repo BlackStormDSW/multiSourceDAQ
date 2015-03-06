@@ -15,168 +15,9 @@
 #include <QByteArray>
 #include <QFile>
 #include <QDir>
-#include <qmath.h>
 #include <QMessageBox>
 #include <QTimer>
 #include <QDebug>
-
-InputData::InputData()
-{
-    initGDMData();
-    connect(inputDataCOM, SIGNAL(readyRead()), this, SLOT(readInputData()));
-}
-
-InputData::~InputData()
-{
-    disconnect(inputDataCOM, SIGNAL(readyRead()), this, SLOT(readInputData()));
-
-    inputDataCOM->close();
-    delete inputDataCOM;
-}
-
-void InputData::initGDMData()
-{
-    GDM_connect_cmd1 = QByteArray::fromHex(GDM_CONNECT_CMD1);
-    GDM_connect_cmd2 = QByteArray::fromHex(GDM_CONNECT_CMD2);
-    GDM_connect_response1 = QByteArray::fromHex(GDM_CONNECT_RESPONSE1);
-    GDM_connect_response2 = QByteArray::fromHex(GDM_CONNECT_RESPONSE2);
-    GDM_connect_done = QByteArray::fromHex(GDM_CONNECT_DONE);
-    GDM_connect_done_response = QByteArray::fromHex(GDM_CONNECT_DONE_RESPONSE);
-    GDM_switchto_dcv = QByteArray::fromHex(GDM_SWITCHTO_DCV);
-    GDM_switchto_dcv_done = QByteArray::fromHex(GDM_SWITCHTO_DCV_DONE);
-    GDM_switchto_acv = QByteArray::fromHex(GDM_SWITCHTO_ACV);
-    GDM_switchto_acv_done = QByteArray::fromHex(GDM_SWITCHTO_ACV_DONE);
-    GDM_get_data = QByteArray::fromHex(GDM_GET_DATA);
-}
-
-void InputData::readInputData()
-{
-    inputBuf = inputDataCOM->readAll();
-    qDebug() << " data: " << inputBuf.data();
-    qDebug() << " data: " << QByteArray::fromHex(inputBuf.data());
-    updateInputData(inputDataCOM, inputBuf.toHex());
-}
-
-void InputData::sendGDMData(Win_QextSerialPort *GDMCOM, QByteArray hexStr)
-{
-    qDebug() << "sendGDMData: " << hexStr.data();
-    GDMCOM->write(hexStr, hexStr.length());
-}
-
-void InputData::initInputCOM()
-{
-    inputCOMSet = new PortSettings();
-    if(QStringLiteral("固纬数字万用表") == dataSrc)
-    {
-        inputCOMSet->BaudRate = GDMINPUTRATE;    //115200
-    } else {
-        inputCOMSet->BaudRate = SANHEINPUTRATE;  //4800
-    }
-    inputCOMSet->Parity = PAR_NONE;
-    inputCOMSet->DataBits = DATA_8;
-    inputCOMSet->StopBits = STOP_1;
-    inputCOMSet->FlowControl = FLOW_OFF;
-    inputCOMSet->Timeout_Millisec = 500;
-}
-
-void InputData::updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr)
-{
-    qDebug() << " hexStr: " << QByteArray::fromHex(hexStr).data();
-    qDebug() << " hexStr: " << hexStr.data();
-
-    if (!hexStr.isEmpty())
-    {
-        qDebug() << "!hexStr.isEmpty()";
-        qDebug() << QString("valueFlag:%1, beginFlag:%2").arg(valueFlag).arg(beginFlag);
-
-        if(QStringLiteral("三和数显指示表") == dataSrc)
-        {
-            qDebug() << "Hex str: " << hexStr.mid(0,2);
-            if ("aa" == hexStr.mid(0,2) || "AA" == hexStr.mid(0,2))
-            {
-                index = 0;
-                dataValue = 0.0;
-            } else {
-                dataValue += hexStr.mid(0, 2).toDouble() * qPow(10, -4 + 2*index);
-                ++ index;
-            }
-        }
-        else //(QStringLiteral("固纬数字万用表") == dataSrc)
-        {
-            qDebug() << QString("valueFlag:%1, beginFlag:%2").arg(valueFlag).arg(beginFlag);
-            if (true == valueFlag && (qstrncmp(GDM_connect_done_response.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_connect_done_response.data())-1)))
-            {
-                dataValue = QByteArray::fromHex(hexStr).split(',')[0].toDouble();
-                sendGDMData(dataCOM, GDM_get_data.data());
-            }
-            else
-            {
-                if (false == beginFlag)
-                {
-                    sendGDMData(dataCOM, GDM_connect_cmd1.data());
-                    qDebug() << "GDM_connect_cmd1:" << GDM_connect_cmd1.data();
-                }
-                qDebug() << " gw hex Str : " << QByteArray::fromHex(hexStr).data() << " GDM_CONNECT_RESPONSE1: " << GDM_connect_response1.data();
-                if (!qstrncmp(GDM_connect_response1.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_connect_response1.data())-1))
-                {
-                    beginFlag = true;
-                    sendGDMData(dataCOM, GDM_connect_cmd2.data());
-                    qDebug() << "GDM_connect_cmd2: " << GDM_connect_cmd2.data();
-                } else if (!qstrncmp(GDM_connect_response2.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_connect_response2.data())-1)) {
-                    qDebug() << "GDM_connect_response2: " << GDM_connect_response2.data();
-                    sendGDMData(dataCOM, GDM_connect_done.data());
-                    qDebug() << "GDM_connect_done: " << GDM_connect_done.data();
-                } else if (!qstrncmp(GDM_connect_done_response.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_connect_done_response.data())-1)){
-                    valueFlag = true;
-                    sendGDMData(dataCOM, GDM_get_data.data());
-                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
-                } else if (!qstrncmp(GDM_switchto_dcv_done.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_switchto_dcv_done.data())-1)) {
-                    valueFlag = true;
-                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
-                    sendGDMData(dataCOM, GDM_get_data.data());
-                } else if (!qstrncmp(GDM_switchto_acv_done.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_switchto_acv_done.data())-1)) {
-                    valueFlag = true;
-                    sendGDMData(dataCOM, GDM_get_data.data());
-                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
-                } else {
-                    sendGDMData(dataCOM, GDM_get_data.data());
-                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
-                }
-            }
-        }
-    }
-}
-
-void InputData::setCOMName(QString COMName)
-{
-    inputCOMName = COMName;
-}
-
-void InputData::setDataSrc(QString src)
-{
-    dataSrc = src;
-}
-
-double InputData::getData()
-{
-    return dataValue;
-}
-
-void InputData::init()
-{
-    valueFlag = false;
-    beginFlag = false;
-    initInputCOM();
-    inputDataCOM = new Win_QextSerialPort(inputCOMName,
-                                          *inputCOMSet, QextSerialBase::EventDriven);
-    inputDataCOM->open(QIODevice::ReadWrite);
-}
-
-void InputData::run()
-{
-    sendGDMData(inputDataCOM, GDM_connect_cmd1);
-}
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -234,11 +75,14 @@ void MainWindow::on_countChnSpinBox_valueChanged(int)
 void MainWindow::on_startButton_clicked()
 {
     dataRun();
+    qDebug () << "after dataRun";
 
     if (true == runFlag)
     {
+        qDebug () << "true == runFlag";
         for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
         {
+            inData[i] = new InputData();
             inData[i]->setCOMName(inputCOMBox[i]->currentText());
             inData[i]->setDataSrc(dataSrcBox[i]->currentText());
             inData[i]->init();
@@ -247,6 +91,13 @@ void MainWindow::on_startButton_clicked()
                 inData[i]->run();
             }
         }
+        qDebug () << "11111111111111111";
+        outData = new OutputData;
+        qDebug () << "22222222222222222";
+        outData->setCOMName(ui->outPutPortComboBox->currentText());
+        qDebug () << "33333333333333333";
+        outData->initOutputCOM();
+        qDebug () << "44444444444444444";
     }
 }
 
@@ -255,17 +106,22 @@ void MainWindow::handleData()
     QByteArray sendBuf("B");
     for(int i = 0; i < ui->countChnSpinBox->value(); i ++)
     {
-        sendBuf.append(data[i]);
+        dataStr.setNum(inData[i]->getData());
+        qDebug() << "handleData " << dataStr;
+
+        sendBuf.append(dataStr);
         if (i < ui->countChnSpinBox->value()-1)
             sendBuf.append(",");
     }
     sendBuf.append("E");
+    qDebug() << "the result: " << sendBuf.data();
     outData->setData(sendBuf);
 }
 
 void MainWindow::init()
 {
     runFlag = false;
+    dataStr = "";
     layoutTabWidget();
     initConfig();
 }
@@ -412,6 +268,7 @@ void MainWindow::dataRun()
                 break;
             qDebug() << "index " << i << " : " << "inputCOMBox[i]->currentText(): " << inputCOMBox[i]->currentText();
         }
+        qDebug() << "before time start!";
 
         timer->start(500);
 
@@ -422,45 +279,4 @@ void MainWindow::dataRun()
         }
         timer->stop();
     }
-}
-
-
-OutputData::OutputData()
-{
-}
-
-OutputData::~OutputData()
-{
-    outputDataCOM->close();
-    delete outputDataCOM;
-}
-
-void OutputData::initOutputCOM()
-{
-    outputDataCOM = new Win_QextSerialPort(outputCOMName,
-                                           *outputCOMSet, QextSerialBase::EventDriven);
-    outputDataCOM->open(QIODevice::ReadWrite);
-    outputCOMSet = new PortSettings();
-    outputCOMSet->BaudRate = OUTPUTRATE;
-    outputCOMSet->Parity = PAR_NONE;
-    outputCOMSet->DataBits = DATA_8;
-    outputCOMSet->StopBits = STOP_1;
-    outputCOMSet->FlowControl = FLOW_OFF;
-    outputCOMSet->Timeout_Millisec = 500;
-
-}
-
-void OutputData::sendOutputData()
-{
-    outputDataCOM->write(data, data.length());
-}
-
-void OutputData::setCOMName(QString COMName)
-{
-    outputCOMName = COMName;
-}
-
-void OutputData::setData(QByteArray data)
-{
-
 }
