@@ -48,6 +48,11 @@ void InputData::sendGDMData(Win_QextSerialPort *GDMCOM, QByteArray hexStr)
     GDMCOM->write(hexStr, hexStr.length());
 }
 
+int InputData::getStd()
+{
+    return dataSHStd;
+}
+
 void InputData::initInputCOM()
 {
     inputCOMSet = new PortSettings();
@@ -84,6 +89,8 @@ void InputData::updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr)
                     dataTmp += hexStr.mid(0, 2).toDouble() * qPow(10, -4 + 2*index);
                 } else if (3 == index) {
                     dataSHStd = hexStr.mid(0,2).toInt()%2;
+                    if (1 == dataSHStd)
+                        dataTmp = dataTmp/10.0;
                     if((hexStr.mid(0,2).toInt()/2)%2)
                         dataValue = -dataTmp;
                     else

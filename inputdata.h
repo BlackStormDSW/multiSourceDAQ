@@ -49,6 +49,8 @@ public:
 
     void sendGDMData(Win_QextSerialPort *GDMCOM, QByteArray hexStr);
 
+    int getStd();
+
 public slots:
     void readInputData();
 };

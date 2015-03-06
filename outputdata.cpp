@@ -26,7 +26,7 @@ void OutputData::initOutputCOM()
     outputDataCOM = new Win_QextSerialPort(outputCOMName,
                                            *outputCOMSet, QextSerialBase::EventDriven);
     outputDataCOM->open(QIODevice::ReadWrite);
-
+    qDebug() << "out put data com" ;
     connect(timer, SIGNAL(timeout()), this, SLOT(sendOutputData()));
     timer->start(500);
 }

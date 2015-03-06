@@ -43,6 +43,8 @@ private slots:
 
     void handleData();
 
+    void showInterface();
+
 private:
     //初始化
     void init();
@@ -58,6 +60,9 @@ private:
     //运行接收数据与发送数据
     void dataRun();
 
+    //界面上显示数据
+    void showData(int i);
+
 private:
     Ui::MainWindow *ui;
     /*defaultConfig:默认配置；customConfig：自定义配置*/
@@ -72,6 +77,7 @@ private:
 
     QLabel *dataSrcLabel[CHANNELMAX], *inputCOMLabel[CHANNELMAX], *valueLabel[CHANNELMAX],
     *ADCSwitchLabel[CHANNELMAX], *unitLabel[CHANNELMAX];
+    QLabel *nullLabel1[CHANNELMAX], *nullLabel2[CHANNELMAX];
     QComboBox *dataSrcBox[CHANNELMAX], *inputCOMBox[CHANNELMAX], *ADCSwitchBox[CHANNELMAX];
     QLineEdit *valueDisplay[CHANNELMAX];
     QWidget *tab[CHANNELMAX];

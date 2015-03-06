@@ -32,6 +32,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+//    for (int i = 0; i < CHANNELMAX; i ++)
+//    {
+//        qDebug() << "del inData " << i;
+//        delete inData[i];
+//    }
+//    delete outData;
     delete ui;
 }
 
@@ -70,6 +76,7 @@ void MainWindow::on_resetConfigButton_clicked()
 void MainWindow::on_countChnSpinBox_valueChanged(int)
 {
     display();
+    showData(ui->channelTab->count()-1);
 }
 
 void MainWindow::on_startButton_clicked()
@@ -80,7 +87,6 @@ void MainWindow::on_startButton_clicked()
     {
         for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
         {
-            inData[i] = new InputData();
             inData[i]->setCOMName(inputCOMBox[i]->currentText());
             inData[i]->setDataSrc(dataSrcBox[i]->currentText());
             inData[i]->init();
@@ -89,7 +95,6 @@ void MainWindow::on_startButton_clicked()
                 inData[i]->run();
             }
         }
-        outData = new OutputData;
         outData->setCOMName(ui->outPutPortComboBox->currentText());
         outData->initOutputCOM();
     }
@@ -105,10 +110,44 @@ void MainWindow::handleData()
         sendBuf.append(dataStr);
         if (i < ui->countChnSpinBox->value()-1)
             sendBuf.append(",");
+
+        valueDisplay[i]->setText(dataStr);
+
+        if(0 == inData[i]->getStd())
+            unitLabel[i]->setText("mm");
+        else
+            unitLabel[i]->setText("inch");
     }
     sendBuf.append("E");
-//    qDebug() << "the result: " << sendBuf.data();
+    //    qDebug() << "the result: " << sendBuf.data();
     outData->setData(sendBuf);
+}
+
+void MainWindow::showInterface()
+{
+    showData(ui->channelTab->currentIndex());
+}
+
+void MainWindow::showData(int i)
+{
+    if (0 <= i)
+    {
+        if (QStringLiteral("固纬数字万用表") == dataSrcBox[i]->currentText())
+        {
+            valueLabel[i]->setText(QStringLiteral(" 电  压 "));
+            unitLabel[i]->setText("V ");
+            ADCSwitchLabel[i]->setText(QStringLiteral("交 直 流"));
+            ADCSwitchBox[i]->setHidden(false);
+        } else {
+            valueLabel[i]->setText(QStringLiteral(" 高  度 "));
+            if(0 == inData[i]->getStd())
+                unitLabel[i]->setText("mm");
+            else
+                unitLabel[i]->setText("inch");
+            ADCSwitchLabel[i]->setText("");
+            ADCSwitchBox[i]->setHidden(true);
+        }
+    }
 }
 
 void MainWindow::init()
@@ -117,6 +156,7 @@ void MainWindow::init()
     dataStr = "";
     layoutTabWidget();
     initConfig();
+    showData(ui->channelTab->count()-1);
 }
 
 //选项卡的布局
@@ -129,7 +169,9 @@ void MainWindow::layoutTabWidget()
         dataSrcLabel[i] = new QLabel(QStringLiteral("数据来源"));
         valueLabel[i] = new QLabel(QStringLiteral(" 数  值 "));
         ADCSwitchLabel[i] = new QLabel(QStringLiteral("交 直 流"));
-        unitLabel[i] = new QLabel(QString("V"));
+        unitLabel[i] = new QLabel(QString("V "));
+        nullLabel1[i] = new QLabel(QString(" "));
+        nullLabel2[i] = new QLabel(QString(" "));
 
         dataSrcBox[i] = new QComboBox();
         dataSrcBox[i]->addItem(QStringLiteral("三和数显指示表"));
@@ -163,13 +205,13 @@ void MainWindow::layoutTabWidget()
         layoutLabel[i]->addWidget(ADCSwitchLabel[i]);
 
         layoutInputCOM[i]->addWidget(inputCOMBox[i]);
-        layoutInputCOM[i]->addItem(spacer1[i]);
+        layoutInputCOM[i]->addWidget(nullLabel1[i]);
 
         layoutValue[i]->addWidget(valueDisplay[i]);
         layoutValue[i]->addWidget(unitLabel[i]);
 
         layoutADC[i]->addWidget(ADCSwitchBox[i]);
-        layoutADC[i]->addItem(spacer2[i]);
+        layoutADC[i]->addWidget(nullLabel2[i]);
 
         layoutOption[i]->addWidget(dataSrcBox[i]);
         layoutOption[i]->addLayout(layoutInputCOM[i]);
@@ -180,7 +222,12 @@ void MainWindow::layoutTabWidget()
         layoutMain[i]->addLayout(layoutOption[i]);
 
         tab[i]->setLayout(layoutMain[i]);
+
+        inData[i] = new InputData;
+
+        connect(dataSrcBox[i], SIGNAL(currentIndexChanged(int)), this, SLOT(showInterface()));
     }
+    outData = new OutputData;
     for (int j = 0; j < 20; j ++)
         ui->outPutPortComboBox->addItem(QString("COM%1").arg(j+1));
     for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
@@ -262,11 +309,6 @@ void MainWindow::dataRun()
         timer->start(500);
 
     } else {
-        for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
-        {
-            delete inData[i];
-        }
-        delete outData;
         timer->stop();
     }
 }
