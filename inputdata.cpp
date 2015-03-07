@@ -173,3 +173,11 @@ void InputData::run()
 {
     sendGDMData(inputDataCOM, GDM_connect_cmd1);
 }
+
+void InputData::changADC(QString adc)
+{
+    if ("AC" == adc)
+        sendGDMData(inputDataCOM, GDM_switchto_acv);
+    else if ("DC" == adc)
+        sendGDMData(inputDataCOM, GDM_switchto_dcv);
+}

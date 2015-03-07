@@ -53,6 +53,7 @@ public:
 
 public slots:
     void readInputData();
+    void changADC(QString adc);
 };
 
 #endif // INPUTDATA_H

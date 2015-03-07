@@ -225,6 +225,7 @@ void MainWindow::layoutTabWidget()
 
         inData[i] = new InputData;
 
+        connect(ADCSwitchBox[i], SIGNAL(currentTextChanged(QString)), inData[i], SLOT(changADC(QString)));
         connect(dataSrcBox[i], SIGNAL(currentIndexChanged(int)), this, SLOT(showInterface()));
     }
     outData = new OutputData;
