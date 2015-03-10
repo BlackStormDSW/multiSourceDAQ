@@ -1,4 +1,11 @@
-﻿#include "outputdata.h"
+﻿/*************************************************************************
+**  All rights reserved by Yantai XTD test technology co., LTD.			**
+**																		**
+**                          Author: Dong Shengwei						**
+**          				Date: 2015-03-07                            **
+*************************************************************************/
+
+#include "outputdata.h"
 #include "dataprotocol.h"
 #include <QDebug>
 
@@ -26,7 +33,6 @@ void OutputData::initOutputCOM()
     outputDataCOM = new Win_QextSerialPort(outputCOMName,
                                            *outputCOMSet, QextSerialBase::EventDriven);
     outputDataCOM->open(QIODevice::ReadWrite);
-    qDebug() << "out put data com" ;
     connect(timer, SIGNAL(timeout()), this, SLOT(sendOutputData()));
     timer->start(500);
 }

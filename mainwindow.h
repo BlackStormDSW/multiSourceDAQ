@@ -1,10 +1,15 @@
-﻿#ifndef MAINWINDOW_H
+﻿/*************************************************************************
+**  All rights reserved by Yantai XTD test technology co., LTD.			**
+**																		**
+**          				Author: Dong Shengwei						**
+**          				Date: 2015-03-07							**
+*************************************************************************/
+
+#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
 #include "dataprotocol.h"
-#include "readdata.h"
-#include "senddata.h"
 #include "inputdata.h"
 #include "outputdata.h"
 

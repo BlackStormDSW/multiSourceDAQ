@@ -1,4 +1,11 @@
-﻿#include "mainwindow.h"
+﻿/*************************************************************************
+**  All rights reserved by Yantai XTD test technology co., LTD.			**
+**																		**
+**                          Author: Dong Shengwei						**
+**          				Date: 2015-03-07                            **
+*************************************************************************/
+
+#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QSettings>
 #include <QByteArray>
@@ -34,7 +41,6 @@ MainWindow::~MainWindow()
 {
 //    for (int i = 0; i < CHANNELMAX; i ++)
 //    {
-//        qDebug() << "del inData " << i;
 //        delete inData[i];
 //    }
 //    delete outData;
@@ -44,7 +50,7 @@ MainWindow::~MainWindow()
 //保存配置(将用户当前配置保存到自定义配置文件中)
 void MainWindow::on_saveCfgButton_clicked()
 {
-    customConfig = new QSettings("customConfig.ini", QSettings::IniFormat);
+    customConfig = new QSettings("customConfig.txt", QSettings::IniFormat);
     customConfig->setValue("main/channelCount", ui->countChnSpinBox->text());
     customConfig->setValue("main/outputCOM", ui->outPutPortComboBox->currentText());
 
@@ -52,7 +58,10 @@ void MainWindow::on_saveCfgButton_clicked()
     {
         customConfig->setValue(QString("channel-%1/dataSrc").arg(i+1), dataSrcBox[i]->currentIndex());
         customConfig->setValue(QString("channel-%1/inputCOM").arg(i+1), inputCOMBox[i]->currentText());
-        customConfig->setValue(QString("channel-%1/ADCSwitch").arg(i+1), ADCSwitchBox[i]->currentText());
+        if (ADCSwitchBox[i]->isVisible())
+            customConfig->setValue(QString("channel-%1/ADCSwitch").arg(i+1), ADCSwitchBox[i]->currentText());
+        else
+            customConfig->setValue(QString("channel-%1/ADCSwitch").arg(i+1), QString("DCV"));
     }
     delete customConfig;
 }
@@ -60,15 +69,21 @@ void MainWindow::on_saveCfgButton_clicked()
 //重置配置(从出厂配置文件中读取初始化数值)
 void MainWindow::on_resetConfigButton_clicked()
 {
-    defaultConfig = new QSettings("defaultConfig.ini", QSettings::IniFormat);
+    defaultConfig = new QSettings("defaultConfig.txt", QSettings::IniFormat);
     ui->countChnSpinBox->setValue(defaultConfig->value("main/channelCount").toInt());
     ui->outPutPortComboBox->setCurrentText(defaultConfig->value("main/outputCOM").toString());
 
     for (int i = 0; i < ui->countChnSpinBox->text().toInt(); i ++)
     {
+        qDebug() << "111111111111111: " << i;
         dataSrcBox[i]->setCurrentIndex(defaultConfig->value(QString("channel-%1/dataSrc").arg(i+1)).toInt());
-        inputCOMBox[i]->setCurrentText(defaultConfig->value(QString("channel-%1/inputCOM").arg(i+1)).toString());
-        ADCSwitchBox[i]->setCurrentText(defaultConfig->value(QString("channel-%1/ADCSwitch").arg(i+1)).toString());
+        qDebug() << "333333333333333: " << defaultConfig->value(QString("channel-%1/inputCOM").arg(i+1)).value<QString>();
+        inputCOMBox[i]->setCurrentText(defaultConfig->value(QString("channel-%1/inputCOM").arg(i+1)).value<QString>());
+        qDebug() << "333333333333333: " << defaultConfig->value(QString("channel-%1/ADCSwitch").arg(i+1)).value<QString>();
+        if (ADCSwitchBox[i]->isVisible())
+            ADCSwitchBox[i]->setCurrentText(defaultConfig->value(QString("channel-%1/ADCSwitch").arg(i+1)).value<QString>());
+        qDebug() << i << " " << dataSrcBox[i]->currentIndex() << " " << inputCOMBox[i]->currentText()
+                 << " " << ADCSwitchBox[i]->currentText();
     }
     delete defaultConfig;
 }
@@ -85,6 +100,8 @@ void MainWindow::on_startButton_clicked()
 
     if (true == runFlag)
     {
+        for (int i = 0; i < CHANNELMAX; i ++)
+            connect(ADCSwitchBox[i], SIGNAL(currentTextChanged(QString)), inData[i], SLOT(changADC(QString)));
         for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
         {
             inData[i]->setCOMName(inputCOMBox[i]->currentText());
@@ -92,11 +109,14 @@ void MainWindow::on_startButton_clicked()
             inData[i]->init();
             if (QStringLiteral("固纬数字万用表") == dataSrcBox[i]->currentText())
             {
-                inData[i]->run();
+                inData[i]->run(ADCSwitchBox[i]->currentText());
             }
         }
         outData->setCOMName(ui->outPutPortComboBox->currentText());
         outData->initOutputCOM();
+    } else {
+        for (int i = 0; i < CHANNELMAX; i ++)
+            disconnect(ADCSwitchBox[i], SIGNAL(currentTextChanged(QString)), inData[i], SLOT(changADC(QString)));
     }
 }
 
@@ -181,8 +201,8 @@ void MainWindow::layoutTabWidget()
         for (int j = 0; j < 20; j ++)
             inputCOMBox[i]->addItem(QString("COM%1").arg(j+1));
         ADCSwitchBox[i] = new QComboBox();
-        ADCSwitchBox[i]->addItem("ACV");
         ADCSwitchBox[i]->addItem("DCV");
+        ADCSwitchBox[i]->addItem("ACV");
         valueDisplay[i] = new QLineEdit();
         valueDisplay[i]->setText(QString("%1").arg("0", 6));
 
@@ -225,7 +245,6 @@ void MainWindow::layoutTabWidget()
 
         inData[i] = new InputData;
 
-        connect(ADCSwitchBox[i], SIGNAL(currentTextChanged(QString)), inData[i], SLOT(changADC(QString)));
         connect(dataSrcBox[i], SIGNAL(currentIndexChanged(int)), this, SLOT(showInterface()));
     }
     outData = new OutputData;
@@ -254,8 +273,8 @@ void MainWindow::display()
 //初始化配置
 void MainWindow::initConfig()
 {
-    if(QFile("customConfig.ini").exists()) {
-        config = new QSettings("customConfig.ini", QSettings::IniFormat);
+    if(QFile("customConfig.txt").exists()) {
+        config = new QSettings("customConfig.txt", QSettings::IniFormat);
     } else {
         config = new QSettings("defaultConfig.ini", QSettings::IniFormat);
     }

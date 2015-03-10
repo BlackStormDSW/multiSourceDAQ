@@ -1,4 +1,11 @@
-﻿#ifndef OUTPUTDATA_H
+﻿/*************************************************************************
+**  All rights reserved by Yantai XTD test technology co., LTD.			**
+**																		**
+**          				Author: Dong Shengwei						**
+**          				Date: 2015-03-07							**
+*************************************************************************/
+
+#ifndef OUTPUTDATA_H
 #define OUTPUTDATA_H
 
 #include <QObject>

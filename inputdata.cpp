@@ -1,4 +1,11 @@
-﻿#include "inputdata.h"
+﻿/*************************************************************************
+**  All rights reserved by Yantai XTD test technology co., LTD.			**
+**																		**
+**                          Author: Dong Shengwei						**
+**          				Date: 2015-03-07                            **
+*************************************************************************/
+
+#include "inputdata.h"
 #include "dataprotocol.h"
 #include <QtMath>
 #include <QDebug>
@@ -125,6 +132,10 @@ void InputData::updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr)
                 } else if (!qstrncmp(GDM_connect_done_response.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_connect_done_response.data())-1)){
                     valueFlag = true;
 //                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
+                    if (!adcValue.compare(QString("DCV")))
+                        sendGDMData(dataCOM, GDM_switchto_dcv.data());
+                    else if (!adcValue.compare(QString("ACV")))
+                        sendGDMData(dataCOM, GDM_switchto_acv.data());
                     sendGDMData(dataCOM, GDM_get_data.data());
                 } else if (!qstrncmp(GDM_switchto_dcv_done.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_switchto_dcv_done.data())-1)) {
                     valueFlag = true;
@@ -162,6 +173,7 @@ void InputData::init()
 {
     valueFlag = false;
     beginFlag = false;
+    adcValue = QString("DCV");
     initInputCOM();
     inputDataCOM = new Win_QextSerialPort(inputCOMName,
                                           *inputCOMSet, QextSerialBase::EventDriven);
@@ -169,15 +181,16 @@ void InputData::init()
     connect(inputDataCOM, SIGNAL(readyRead()), this, SLOT(readInputData()));
 }
 
-void InputData::run()
+void InputData::run(QString adc)
 {
+    adcValue = adc;
     sendGDMData(inputDataCOM, GDM_connect_cmd1);
 }
 
 void InputData::changADC(QString adc)
 {
-    if ("AC" == adc)
-        sendGDMData(inputDataCOM, GDM_switchto_acv);
-    else if ("DC" == adc)
-        sendGDMData(inputDataCOM, GDM_switchto_dcv);
+    if ("ACV" == adc)
+        sendGDMData(inputDataCOM, GDM_switchto_acv.data());
+    else if ("DCV" == adc)
+        sendGDMData(inputDataCOM, GDM_switchto_dcv.data());
 }

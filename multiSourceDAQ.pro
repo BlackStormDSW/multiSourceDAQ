@@ -1,8 +1,9 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2015-01-20T21:27:00
-#
-#-------------------------------------------------
+##########################################################################
+##  All rights reserved by Yantai XTD test technology co., LTD.         ##
+##									##
+##                          Author: Dong Shengwei			##
+##                          Date: 2015-01-20                            ##
+##########################################################################
 
 QT       += core gui
 
@@ -17,8 +18,6 @@ SOURCES += main.cpp\
     qextserialbase.cpp \
     qextserialport.cpp \
     win_qextserialport.cpp \
-    readdata.cpp \
-    senddata.cpp \
     inputdata.cpp \
     outputdata.cpp
 
@@ -26,10 +25,10 @@ HEADERS  += mainwindow.h \
     qextserialbase.h \
     qextserialport.h \
     win_qextserialport.h \
-    readdata.h \
-    senddata.h \
     dataprotocol.h \
     inputdata.h \
     outputdata.h
 
 FORMS    += mainwindow.ui
+
+RC_FILE = multiSourceDAQ.rc

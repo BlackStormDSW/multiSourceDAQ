@@ -1,4 +1,11 @@
-﻿#ifndef INPUTDATA_H
+﻿/*************************************************************************
+**  All rights reserved by Yantai XTD test technology co., LTD.			**
+**																		**
+**          				Author: Dong Shengwei						**
+**          				Date: 2015-03-07							**
+*************************************************************************/
+
+#ifndef INPUTDATA_H
 #define INPUTDATA_H
 
 #include <QObject>
@@ -31,10 +38,13 @@ private:
 
     bool valueFlag, beginFlag;
 
+    QString adcValue;
+
 private:
     //初始化串口
     void initInputCOM();
 
+    //更新输入数据
     void updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr);
 
 public:
@@ -42,7 +52,7 @@ public:
     void setDataSrc(QString src);
     double getData();
     void init();
-    void run();
+    void run(QString adc);
 
     //初始化发送接收的GDM数据
     void initGDMData();

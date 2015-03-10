@@ -1,4 +1,11 @@
-﻿#ifndef DATAPROTOCOL_H
+﻿/*************************************************************************
+**  All rights reserved by Yantai XTD test technology co., LTD.			**
+**																		**
+**          				Author: Dong Shengwei						**
+**          				Date: 2015-02-01							**
+*************************************************************************/
+
+#ifndef DATAPROTOCOL_H
 #define DATAPROTOCOL_H
 
 #include <QString>
