@@ -27,6 +27,7 @@ InputData::~InputData()
     delete inputDataCOM;
 }
 
+//初始化发送接收的GDM数据
 void InputData::initGDMData()
 {
     GDM_connect_cmd1 = QByteArray::fromHex(GDM_CONNECT_CMD1);
@@ -42,6 +43,7 @@ void InputData::initGDMData()
     GDM_get_data = QByteArray::fromHex(GDM_GET_DATA);
 }
 
+//读取输入端口的数据
 void InputData::readInputData()
 {
     inputBuf = inputDataCOM->readAll();
@@ -49,18 +51,21 @@ void InputData::readInputData()
     updateInputData(inputDataCOM, inputBuf.toHex());
 }
 
+//向数字万用表发送指令
 void InputData::sendGDMData(Win_QextSerialPort *GDMCOM, QByteArray hexStr)
 {
 //    qDebug() << "sendGDMData: " << hexStr.data();
     GDMCOM->write(hexStr, hexStr.length());
 }
 
+//输出三和数显指示表位移的单位是公制还是英制
 int InputData::getStd()
 {
     return dataSHStd;
 }
 
-void InputData::initInputCOM()
+//初始化输入端口的设置
+void InputData::initInputCOMSet()
 {
     inputCOMSet = new PortSettings();
     if(QStringLiteral("固纬数字万用表") == dataSrc)
@@ -73,12 +78,12 @@ void InputData::initInputCOM()
     inputCOMSet->DataBits = DATA_8;
     inputCOMSet->StopBits = STOP_1;
     inputCOMSet->FlowControl = FLOW_OFF;
-    inputCOMSet->Timeout_Millisec = 500;
+    inputCOMSet->Timeout_Millisec = INTERVAL;
 }
 
+//更新输入数据
 void InputData::updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr)
 {
-
     if (!hexStr.isEmpty())
     {
 //        qDebug() << QString("valueFlag:%1, beginFlag:%2").arg(valueFlag).arg(beginFlag);
@@ -154,43 +159,67 @@ void InputData::updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr)
     }
 }
 
+//设置数字输入端口名称
 void InputData::setCOMName(QString COMName)
 {
     inputCOMName = COMName;
+    //当端口号大于9，则需要在端口名之前添加字符串"\\\\.\\"，否则端口打不开
+    if(inputCOMName.size()>4)
+    {
+        inputCOMName.insert(0,"\\\\.\\");
+    }
 }
 
+//设置数据来源名称
 void InputData::setDataSrc(QString src)
 {
     dataSrc = src;
 }
 
+//输出数据
 double InputData::getData()
 {
     return dataValue;
 }
 
-void InputData::init()
+//初始化输入端口
+void InputData::initInputCOM()
 {
     valueFlag = false;
     beginFlag = false;
     adcValue = QString("DCV");
-    initInputCOM();
+    initInputCOMSet();
     inputDataCOM = new Win_QextSerialPort(inputCOMName,
                                           *inputCOMSet, QextSerialBase::EventDriven);
     inputDataCOM->open(QIODevice::ReadWrite);
     connect(inputDataCOM, SIGNAL(readyRead()), this, SLOT(readInputData()));
 }
 
-void InputData::run(QString adc)
+//关闭输入端口
+void InputData::closeInputCOM()
+{
+    disconnect(inputDataCOM, SIGNAL(readyRead()), this, SLOT(readInputData()));
+    inputDataCOM->close();
+    delete inputDataCOM;
+}
+
+//向数字万用表发送链接指令，开始读取数字万用表数据
+void InputData::runGDM(QString adc)
 {
     adcValue = adc;
     sendGDMData(inputDataCOM, GDM_connect_cmd1);
 }
 
+//切换数字万用表的交流/直流
 void InputData::changADC(QString adc)
 {
-    if ("ACV" == adc)
+    qDebug() << "adc: " << adc;
+    if (!adc.compare("ACV"))
+    {
+        qDebug() << "ACV";
         sendGDMData(inputDataCOM, GDM_switchto_acv.data());
-    else if ("DCV" == adc)
+    } else if (!adc.compare("DCV")) {
+        qDebug() << "DCV";
         sendGDMData(inputDataCOM, GDM_switchto_dcv.data());
+    }
 }

@@ -19,22 +19,31 @@ public:
     explicit OutputData();
     ~OutputData();
 private:
+    //输出端口的设置
     PortSettings *outputCOMSet;
+    //输出端口
     Win_QextSerialPort *outputDataCOM;
-
+    //输出端口的名称
     QString outputCOMName;
+    //向输出端口发送的数据
     QByteArray data;
-
+    //定时器
     QTimer *timer;
 
-    bool valueFlag, beginFlag;
-
 public:
-    //初始化串口
+    //初始化输出端口
     void initOutputCOM();
+
+    //关闭输出端口
+    void closeOutputCOM();
+
+    //设置输出端口的名称
     void setCOMName(QString COMName);
+
+    //获取要输出的数据
     void setData(QByteArray dataIn);
 private slots:
+    //向输出端口发送数据
     void sendOutputData();
 };
 

@@ -20,6 +20,7 @@ OutputData::~OutputData()
     delete outputDataCOM;
 }
 
+//初始化串口
 void OutputData::initOutputCOM()
 {
     outputCOMSet = new PortSettings();
@@ -34,19 +35,30 @@ void OutputData::initOutputCOM()
                                            *outputCOMSet, QextSerialBase::EventDriven);
     outputDataCOM->open(QIODevice::ReadWrite);
     connect(timer, SIGNAL(timeout()), this, SLOT(sendOutputData()));
-    timer->start(500);
+    timer->start(INTERVAL);
 }
 
+//关闭输出端口
+void OutputData::closeOutputCOM()
+{
+    timer->stop();
+    outputDataCOM->close();
+    delete outputDataCOM;
+}
+
+//向输出端口发送数据
 void OutputData::sendOutputData()
 {
     outputDataCOM->write(data, data.length());
 }
 
+//设置输出端口的名称
 void OutputData::setCOMName(QString COMName)
 {
     outputCOMName = COMName;
 }
 
+//获取要输出的数据
 void OutputData::setData(QByteArray dataIn)
 {
     data = dataIn;

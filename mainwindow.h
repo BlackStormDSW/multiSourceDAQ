@@ -38,16 +38,22 @@ public:
     ~MainWindow();
 
 private slots:
+    //保存配置(将用户当前配置保存到自定义配置文件中)
     void on_saveCfgButton_clicked();
 
+    //重置配置(从出厂配置文件中读取初始化数值)
     void on_resetConfigButton_clicked();
 
+    //通道数目改变时，触发窗口显示改变
     void on_countChnSpinBox_valueChanged(int);
 
+    //点击开始按钮，开始或停止数据采集
     void on_startButton_clicked();
 
+    //将输入通道的数据组合
     void handleData();
 
+    //在标签页中显示当前通道的参数，如数据名称、单位等
     void showInterface();
 
 private:
@@ -57,15 +63,16 @@ private:
     //选项卡的布局
     void layoutTabWidget();
 
+    //界面显示
     void display();
 
     //初始化配置
     void initConfig();
 
-    //运行接收数据与发送数据
+    //开始或停止运行
     void dataRun();
 
-    //界面上显示数据
+    //在标签页中显示指定通道的参数，如数据名称、单位以及实时数据等
     void showData(int i);
 
 private:
