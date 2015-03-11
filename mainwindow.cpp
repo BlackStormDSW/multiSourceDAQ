@@ -323,7 +323,7 @@ void MainWindow::dataRun()
                 break;
         }
 
-        timer->start(500);
+        timer->start(INTERVAL);
 
     } else {
         timer->stop();

@@ -29,7 +29,7 @@ void OutputData::initOutputCOM()
     outputCOMSet->DataBits = DATA_8;
     outputCOMSet->StopBits = STOP_1;
     outputCOMSet->FlowControl = FLOW_OFF;
-    outputCOMSet->Timeout_Millisec = 500;
+    outputCOMSet->Timeout_Millisec = INTERVAL;
 
     outputDataCOM = new Win_QextSerialPort(outputCOMName,
                                            *outputCOMSet, QextSerialBase::EventDriven);
