@@ -20,8 +20,8 @@ OutputData::~OutputData()
     delete outputDataCOM;
 }
 
-//初始化串口
-void OutputData::initOutputCOM()
+//初始化输出端口设置
+void OutputData::initOutputCOMSet()
 {
     outputCOMSet = new PortSettings();
     outputCOMSet->BaudRate = OUTPUTRATE;
@@ -30,10 +30,29 @@ void OutputData::initOutputCOM()
     outputCOMSet->StopBits = STOP_1;
     outputCOMSet->FlowControl = FLOW_OFF;
     outputCOMSet->Timeout_Millisec = INTERVAL;
+}
 
+//配置输出端口设置
+void OutputData::setOutputCOM()
+{
+    outputDataCOM->setBaudRate(OUTPUTRATE);
+    outputDataCOM->setDataBits(DATA_8);
+    outputDataCOM->setParity(PAR_NONE);
+    outputDataCOM->setStopBits(STOP_1);
+    outputDataCOM->setFlowControl(FLOW_OFF);
+    outputDataCOM->setTimeout(INTERVAL);
+}
+
+//初始化串口
+void OutputData::initOutputCOM()
+{
+    initOutputCOMSet();
     outputDataCOM = new Win_QextSerialPort(outputCOMName,
                                            *outputCOMSet, QextSerialBase::EventDriven);
     outputDataCOM->open(QIODevice::ReadWrite);
+
+    setOutputCOM();
+
     connect(timer, SIGNAL(timeout()), this, SLOT(sendOutputData()));
     timer->start(INTERVAL);
 }

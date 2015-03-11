@@ -192,7 +192,27 @@ void InputData::initInputCOM()
     inputDataCOM = new Win_QextSerialPort(inputCOMName,
                                           *inputCOMSet, QextSerialBase::EventDriven);
     inputDataCOM->open(QIODevice::ReadWrite);
+
+    setInputCOM();
+
     connect(inputDataCOM, SIGNAL(readyRead()), this, SLOT(readInputData()));
+}
+
+//配置输入端口设置
+void InputData::setInputCOM()
+{
+    if(QStringLiteral("固纬数字万用表") == dataSrc)
+    {
+        inputDataCOM->setBaudRate(GDMINPUTRATE);    //115200
+    } else {
+        inputDataCOM->setBaudRate(SANHEINPUTRATE);  //4800
+    }
+
+    inputDataCOM->setDataBits(DATA_8);
+    inputDataCOM->setParity(PAR_NONE);
+    inputDataCOM->setStopBits(STOP_1);
+    inputDataCOM->setFlowControl(FLOW_OFF);
+    inputDataCOM->setTimeout(INTERVAL);
 }
 
 //关闭输入端口

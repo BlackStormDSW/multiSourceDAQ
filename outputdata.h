@@ -30,6 +30,13 @@ private:
     //定时器
     QTimer *timer;
 
+private:
+    //初始化输出端口设置
+    void initOutputCOMSet();
+
+    //配置输出端口设置
+    void setOutputCOM();
+
 public:
     //初始化输出端口
     void initOutputCOM();

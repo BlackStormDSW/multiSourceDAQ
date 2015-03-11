@@ -50,6 +50,9 @@ private:
     //初始化输入端口的设置
     void initInputCOMSet();
 
+    //配置输入端口设置
+    void setInputCOM();
+
     //更新输入数据
     void updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr);
 
