@@ -75,6 +75,11 @@ void OutputData::sendOutputData()
 void OutputData::setCOMName(QString COMName)
 {
     outputCOMName = COMName;
+    //当端口号大于9，则需要在端口名之前添加字符串"\\\\.\\"，否则端口打不开
+    if(outputCOMName.size()>4)
+    {
+        outputCOMName.insert(0,"\\\\.\\");
+    }
 }
 
 //获取要输出的数据
