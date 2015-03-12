@@ -95,6 +95,8 @@ void MainWindow::on_startButton_clicked()
 {
     dataRun();
 
+    setWidgetEnable(!runFlag);
+
     if (true == runFlag)
     {
         for (int i = 0; i < CHANNELMAX; i ++)
@@ -167,6 +169,19 @@ void MainWindow::showData(int i)
             ADCSwitchLabel[i]->setText("");
             ADCSwitchBox[i]->setHidden(true);
         }
+    }
+}
+
+//设置界面空间是否可用
+void MainWindow::setWidgetEnable(bool enable)
+{
+    ui->resetConfigButton->setEnabled(enable);
+    ui->outPutPortComboBox->setEnabled(enable);
+    ui->countChnSpinBox->setEnabled(enable);
+    for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
+    {
+        dataSrcBox[i]->setEnabled(enable);
+        inputCOMBox[i]->setEnabled(enable);
     }
 }
 

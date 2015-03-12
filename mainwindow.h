@@ -75,6 +75,9 @@ private:
     //在标签页中显示指定通道的参数，如数据名称、单位以及实时数据等
     void showData(int i);
 
+    //设置界面空间是否可用
+    void setWidgetEnable(bool enable);
+
 private:
     Ui::MainWindow *ui;
     /*defaultConfig:默认配置；customConfig：自定义配置*/
