@@ -70,7 +70,7 @@ private:
     void initConfig();
 
     //开始或停止运行
-    void dataRun();
+    void checkCOMConflict();
 
     //在标签页中显示指定通道的参数，如数据名称、单位以及实时数据等
     void showData(int i);
@@ -114,6 +114,9 @@ private:
 
     //接收与发送数据是否开始的标志
     bool runFlag;
+
+    //是否存在冲突串口
+    bool conflictCOM;
 
     //发送数据的定时器
     QTimer *timer;

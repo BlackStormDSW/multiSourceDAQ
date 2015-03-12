@@ -93,34 +93,43 @@ void MainWindow::on_countChnSpinBox_valueChanged(int)
 //点击开始按钮，开始或停止数据采集
 void MainWindow::on_startButton_clicked()
 {
-    dataRun();
+    runFlag = !runFlag;
+    checkCOMConflict();
 
-    setWidgetEnable(!runFlag);
-
-    if (true == runFlag)
+    if (false == conflictCOM)
     {
-        for (int i = 0; i < CHANNELMAX; i ++)
-            connect(ADCSwitchBox[i], SIGNAL(currentTextChanged(QString)), inData[i], SLOT(changADC(QString)));
-        for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
+        setWidgetEnable(!runFlag);
+
+        if (true == runFlag)
         {
-            inData[i]->setCOMName(inputCOMBox[i]->currentText());
-            inData[i]->setDataSrc(dataSrcBox[i]->currentText());
-            inData[i]->initInputCOM();
-            if (QStringLiteral("固纬数字万用表") == dataSrcBox[i]->currentText())
+            ui->startButton->setText(QStringLiteral("停止"));
+            for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
             {
-                inData[i]->runGDM(ADCSwitchBox[i]->currentText());
+                connect(ADCSwitchBox[i], SIGNAL(currentTextChanged(QString)), inData[i], SLOT(changADC(QString)));
+                inData[i]->setCOMName(inputCOMBox[i]->currentText());
+                inData[i]->setDataSrc(dataSrcBox[i]->currentText());
+                inData[i]->initInputCOM();
+                if (QStringLiteral("固纬数字万用表") == dataSrcBox[i]->currentText())
+                {
+                    inData[i]->runGDM(ADCSwitchBox[i]->currentText());
+                }
             }
+            outData->setCOMName(ui->outPutPortComboBox->currentText());
+            outData->initOutputCOM();
+            timer->start(INTERVAL);
+        } else {
+            ui->startButton->setText(QStringLiteral("开始"));
+            for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
+            {
+                disconnect(ADCSwitchBox[i], SIGNAL(currentTextChanged(QString)), inData[i], SLOT(changADC(QString)));
+                inData[i]->closeInputCOM();
+            }
+            outData->closeOutputCOM();
+            timer->stop();
         }
-        outData->setCOMName(ui->outPutPortComboBox->currentText());
-        outData->initOutputCOM();
     } else {
-        for (int i = 0; i < CHANNELMAX; i ++)
-            disconnect(ADCSwitchBox[i], SIGNAL(currentTextChanged(QString)), inData[i], SLOT(changADC(QString)));
-        for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
-        {
-            inData[i]->closeInputCOM();
-        }
-        outData->closeOutputCOM();
+        runFlag = !runFlag;
+        conflictCOM = false;
     }
 }
 
@@ -189,6 +198,7 @@ void MainWindow::setWidgetEnable(bool enable)
 void MainWindow::init()
 {
     runFlag = false;
+    conflictCOM = false;
     dataStr = "";
     layoutTabWidget();
     initConfig();
@@ -308,39 +318,31 @@ void MainWindow::initConfig()
 }
 
 //开始或停止运行
-void MainWindow::dataRun()
+void MainWindow::checkCOMConflict()
 {
-    runFlag = !runFlag;
-    bool checkOk = true;
-
-    if( true == runFlag) {
-        ui->startButton->setText(QStringLiteral("停止"));
-    } else {
-        ui->startButton->setText(QStringLiteral("开始"));
-    }
-
-    if (true == runFlag)
+    if( true == runFlag)
     {
         for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
         {
+            if (ui->outPutPortComboBox->currentText() == inputCOMBox[i]->currentText())
+            {
+                conflictCOM = true;
+                break;
+            }
             for (int j = 0; j < i; j ++)
             {
                 if (inputCOMBox[j]->currentText() == inputCOMBox[i]->currentText())
                 {
-                    QMessageBox msgBox;
-                    msgBox.setText(QStringLiteral("串口有冲突,请检查"));
-                    msgBox.exec();
-                    checkOk = false;
+                    conflictCOM = true;
                     break;
                 }
             }
-            if (false == checkOk)
-                break;
         }
-
-        timer->start(INTERVAL);
-
-    } else {
-        timer->stop();
+        if (true == conflictCOM)
+        {
+            QMessageBox msgBox;
+            msgBox.setText(QStringLiteral("串口有冲突,请检查"));
+            msgBox.exec();
+        }
     }
 }
