@@ -9,6 +9,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QString>
+#include <QComboBox>
 #include "dataprotocol.h"
 #include "inputdata.h"
 #include "outputdata.h"
@@ -23,7 +25,7 @@ class QLayout;
 class QHBoxLayout;
 class QVBoxLayout;
 class QGridLayout;
-class QComboBox;
+class ComboBox;
 class QLineEdit;
 class QSpacerItem;
 class QTextCodec;
@@ -93,7 +95,8 @@ private:
     QLabel *dataSrcLabel[CHANNELMAX], *inputCOMLabel[CHANNELMAX], *valueLabel[CHANNELMAX],
     *ADCSwitchLabel[CHANNELMAX], *unitLabel[CHANNELMAX];
     QLabel *nullLabel1[CHANNELMAX], *nullLabel2[CHANNELMAX];
-    QComboBox *dataSrcBox[CHANNELMAX], *inputCOMBox[CHANNELMAX], *ADCSwitchBox[CHANNELMAX];
+    QComboBox *dataSrcBox[CHANNELMAX], *ADCSwitchBox[CHANNELMAX];
+    ComboBox *inputCOMBox[CHANNELMAX];
     QLineEdit *valueDisplay[CHANNELMAX];
     QWidget *tab[CHANNELMAX];
 

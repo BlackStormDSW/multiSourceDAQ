@@ -6,6 +6,7 @@
 *************************************************************************/
 
 #include "mainwindow.h"
+#include "combobox.h"
 #include "ui_mainwindow.h"
 #include <QSettings>
 #include <QByteArray>
@@ -16,7 +17,6 @@
 #include <QVBoxLayout>
 #include <QGridLayout>
 #include <QSpacerItem>
-#include <QComboBox>
 #include <QLineEdit>
 #include <QString>
 #include <QByteArray>
@@ -194,12 +194,14 @@ void MainWindow::setWidgetEnable(bool enable)
     }
 }
 
+
 //初始化
 void MainWindow::init()
 {
     runFlag = false;
     conflictCOM = false;
     dataStr = "";
+
     layoutTabWidget();
     initConfig();
     showData(ui->channelTab->count()-1);
@@ -216,16 +218,14 @@ void MainWindow::layoutTabWidget()
         valueLabel[i] = new QLabel(QStringLiteral(" 数  值 "));
         ADCSwitchLabel[i] = new QLabel(QStringLiteral("交 直 流"));
         unitLabel[i] = new QLabel(QString("V "));
-        nullLabel1[i] = new QLabel(QString(" "));
+        nullLabel1[i] = new QLabel(QString(""));
         nullLabel2[i] = new QLabel(QString(" "));
 
         dataSrcBox[i] = new QComboBox();
         dataSrcBox[i]->addItem(QStringLiteral("三和数显指示表"));
         dataSrcBox[i]->addItem(QStringLiteral("固纬数字万用表"));
         dataSrcBox[i]->setCurrentText(QStringLiteral("三和数显指示表"));
-        inputCOMBox[i] = new QComboBox();
-        for (int j = 0; j < 20; j ++)
-            inputCOMBox[i]->addItem(QString("COM%1").arg(j+1));
+        inputCOMBox[i] = new ComboBox();
         ADCSwitchBox[i] = new QComboBox();
         ADCSwitchBox[i]->addItem("DCV");
         ADCSwitchBox[i]->addItem("ACV");
@@ -251,7 +251,7 @@ void MainWindow::layoutTabWidget()
         layoutLabel[i]->addWidget(ADCSwitchLabel[i]);
 
         layoutInputCOM[i]->addWidget(inputCOMBox[i]);
-        layoutInputCOM[i]->addWidget(nullLabel1[i]);
+        layoutInputCOM[i]->addItem(spacer1[i]);
 
         layoutValue[i]->addWidget(valueDisplay[i]);
         layoutValue[i]->addWidget(unitLabel[i]);
@@ -272,6 +272,7 @@ void MainWindow::layoutTabWidget()
         inData[i] = new InputData;
 
         connect(dataSrcBox[i], SIGNAL(currentIndexChanged(int)), this, SLOT(showInterface()));
+//        connect(inputCOMBox[i], SIGNAL(clicked()), inputCOMBox[i], SLOT(updateCOMList()));
     }
     outData = new OutputData;
     for (int j = 0; j < 20; j ++)

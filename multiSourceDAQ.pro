@@ -12,6 +12,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = multiSourceDAQ
 TEMPLATE = app
 
+LIBS += -lAdvapi32
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -19,7 +20,8 @@ SOURCES += main.cpp\
     qextserialport.cpp \
     win_qextserialport.cpp \
     inputdata.cpp \
-    outputdata.cpp
+    outputdata.cpp \
+    combobox.cpp
 
 HEADERS  += mainwindow.h \
     qextserialbase.h \
@@ -27,7 +29,8 @@ HEADERS  += mainwindow.h \
     win_qextserialport.h \
     dataprotocol.h \
     inputdata.h \
-    outputdata.h
+    outputdata.h \
+    combobox.h
 
 FORMS    += mainwindow.ui
 
