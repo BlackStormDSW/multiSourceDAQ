@@ -106,7 +106,7 @@ void MainWindow::on_startButton_clicked()
             for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
             {
                 connect(ADCSwitchBox[i], SIGNAL(currentTextChanged(QString)), inData[i], SLOT(changADC(QString)));
-                inData[i]->setCOMName(inputCOMBox[i]->currentText());
+                inData[i]->setCOMName(inputCOMBox[i]->currentText().mid(0,(inputCOMBox[i]->currentText().indexOf('('))));
                 inData[i]->setDataSrc(dataSrcBox[i]->currentText());
                 inData[i]->initInputCOM();
                 if (QStringLiteral("固纬数字万用表") == dataSrcBox[i]->currentText())
@@ -325,7 +325,7 @@ void MainWindow::checkCOMConflict()
     {
         for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
         {
-            if (ui->outPutPortComboBox->currentText() == inputCOMBox[i]->currentText())
+            if (ui->outPutPortComboBox->currentText() == inputCOMBox[i]->currentText().mid(0,(inputCOMBox[i]->currentText().indexOf('('))))
             {
                 conflictCOM = true;
                 break;
