@@ -32,6 +32,6 @@ HEADERS  += mainwindow.h \
     outputdata.h \
     combobox.h
 
-FORMS    += mainwindow.ui
+FORMS    +=
 
 RC_FILE = multiSourceDAQ.rc

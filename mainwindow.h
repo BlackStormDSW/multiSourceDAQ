@@ -19,6 +19,9 @@ namespace Ui {
 class MainWindow;
 }
 
+class QTabWidget;
+class QPushButton;
+class QSpinBox;
 class QSettings;
 class QLabel;
 class QLayout;
@@ -81,7 +84,8 @@ private:
     void setWidgetEnable(bool enable);
 
 private:
-    Ui::MainWindow *ui;
+//    Ui::MainWindow *ui;
+    QWidget *widget;
     /*defaultConfig:默认配置；customConfig：自定义配置*/
     QSettings *defaultConfig, *customConfig, *config;
     /*
@@ -91,6 +95,17 @@ private:
     inputCOM[CHANNELMAX]    ：输入端口号；
     ADCSwitch[CHANNELMAX]   ：交流/直流开关
     */
+
+    QLabel *countChannel, *outputCOMLabel;
+    QSpinBox *countChnSpinBox;
+    QPushButton *startButton, *saveCfgButton, *resetCfgButton;
+    ComboBox *outputCOMBox;
+
+    QHBoxLayout *countChnLayout;
+    QVBoxLayout *outputCOMLayout, *leftLayout;
+    QHBoxLayout *mainLayout;
+
+    QTabWidget *channelTab;
 
     QLabel *dataSrcLabel[CHANNELMAX], *inputCOMLabel[CHANNELMAX], *valueLabel[CHANNELMAX],
     *ADCSwitchLabel[CHANNELMAX], *unitLabel[CHANNELMAX];

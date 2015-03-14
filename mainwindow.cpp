@@ -7,12 +7,14 @@
 
 #include "mainwindow.h"
 #include "combobox.h"
-#include "ui_mainwindow.h"
+#include <QPushButton>
 #include <QSettings>
 #include <QByteArray>
+#include <QTabWidget>
 #include <QLabel>
 #include <QObject>
 #include <QLayout>
+#include <QSpinBox>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -27,14 +29,15 @@
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    QMainWindow(parent)
 {
-    ui->setupUi(this);
+    widget = new QWidget(this);
     setWindowTitle(QStringLiteral("多源数据采集软件"));
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(handleData()));
     init();
+    widget->setLayout(mainLayout);
+    setCentralWidget(widget);
 }
 
 MainWindow::~MainWindow()
@@ -44,17 +47,17 @@ MainWindow::~MainWindow()
 //        delete inData[i];
 //    }
 //    delete outData;
-    delete ui;
+//    delete ui;
 }
 
 //保存配置(将用户当前配置保存到自定义配置文件中)
 void MainWindow::on_saveCfgButton_clicked()
 {
     customConfig = new QSettings("customConfig.txt", QSettings::IniFormat);
-    customConfig->setValue("main/channelCount", ui->countChnSpinBox->text());
-    customConfig->setValue("main/outputCOM", ui->outPutPortComboBox->currentText());
+    customConfig->setValue("main/channelCount", countChnSpinBox->text());
+    customConfig->setValue("main/outputCOM", outputCOMBox->currentText());
 
-    for (int i = 0; i < ui->countChnSpinBox->text().toInt(); i ++)
+    for (int i = 0; i < countChnSpinBox->text().toInt(); i ++)
     {
         customConfig->setValue(QString("channel-%1/dataSrc").arg(i+1), dataSrcBox[i]->currentIndex());
         customConfig->setValue(QString("channel-%1/inputCOM").arg(i+1), inputCOMBox[i]->currentText());
@@ -70,10 +73,10 @@ void MainWindow::on_saveCfgButton_clicked()
 void MainWindow::on_resetConfigButton_clicked()
 {
     defaultConfig = new QSettings("defaultConfig.txt", QSettings::IniFormat);
-    ui->countChnSpinBox->setValue(defaultConfig->value("main/channelCount").toInt());
-    ui->outPutPortComboBox->setCurrentText(defaultConfig->value("main/outputCOM").toString());
+    countChnSpinBox->setValue(defaultConfig->value("main/channelCount").toInt());
+    outputCOMBox->setCurrentText(defaultConfig->value("main/outputCOM").toString());
 
-    for (int i = 0; i < ui->countChnSpinBox->text().toInt(); i ++)
+    for (int i = 0; i < countChnSpinBox->text().toInt(); i ++)
     {
         dataSrcBox[i]->setCurrentIndex(defaultConfig->value(QString("channel-%1/dataSrc").arg(i+1)).toInt());
         inputCOMBox[i]->setCurrentText(defaultConfig->value(QString("channel-%1/inputCOM").arg(i+1)).value<QString>());
@@ -87,8 +90,8 @@ void MainWindow::on_resetConfigButton_clicked()
 void MainWindow::on_countChnSpinBox_valueChanged(int)
 {
     display();
-    showData(ui->channelTab->count()-1);
-    inputCOMBox[ui->channelTab->count()-1]->updateCOMList();
+    showData(channelTab->count()-1);
+    inputCOMBox[channelTab->count()-1]->updateCOMList();
 }
 
 //点击开始按钮，开始或停止数据采集
@@ -103,8 +106,8 @@ void MainWindow::on_startButton_clicked()
 
         if (true == runFlag)
         {
-            ui->startButton->setText(QStringLiteral("停止"));
-            for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
+            startButton->setText(QStringLiteral("停止"));
+            for (int i = 0; i < countChnSpinBox->value(); i ++)
             {
                 connect(ADCSwitchBox[i], SIGNAL(currentTextChanged(QString)), inData[i], SLOT(changADC(QString)));
                 inData[i]->setCOMName(inputCOMBox[i]->currentText().mid(0,(inputCOMBox[i]->currentText().indexOf('('))));
@@ -115,12 +118,12 @@ void MainWindow::on_startButton_clicked()
                     inData[i]->runGDM(ADCSwitchBox[i]->currentText());
                 }
             }
-            outData->setCOMName(ui->outPutPortComboBox->currentText());
+            outData->setCOMName(outputCOMBox->currentText());
             outData->initOutputCOM();
             timer->start(INTERVAL);
         } else {
-            ui->startButton->setText(QStringLiteral("开始"));
-            for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
+            startButton->setText(QStringLiteral("开始"));
+            for (int i = 0; i < countChnSpinBox->value(); i ++)
             {
                 disconnect(ADCSwitchBox[i], SIGNAL(currentTextChanged(QString)), inData[i], SLOT(changADC(QString)));
                 inData[i]->closeInputCOM();
@@ -138,12 +141,12 @@ void MainWindow::on_startButton_clicked()
 void MainWindow::handleData()
 {
     QByteArray sendBuf("B");
-    for(int i = 0; i < ui->countChnSpinBox->value(); i ++)
+    for(int i = 0; i < countChnSpinBox->value(); i ++)
     {
         dataStr.setNum(inData[i]->getData());
 
         sendBuf.append(dataStr);
-        if (i < ui->countChnSpinBox->value()-1)
+        if (i < countChnSpinBox->value()-1)
             sendBuf.append(",");
 
         valueDisplay[i]->setText(dataStr);
@@ -156,7 +159,7 @@ void MainWindow::handleData()
 //在标签页中显示当前通道的参数，如数据名称、单位等
 void MainWindow::showInterface()
 {
-    showData(ui->channelTab->currentIndex());
+    showData(channelTab->currentIndex());
 }
 
 //在标签页中显示指定通道的参数，如数据名称、单位以及实时数据等
@@ -185,10 +188,10 @@ void MainWindow::showData(int i)
 //设置界面空间是否可用
 void MainWindow::setWidgetEnable(bool enable)
 {
-    ui->resetConfigButton->setEnabled(enable);
-    ui->outPutPortComboBox->setEnabled(enable);
-    ui->countChnSpinBox->setEnabled(enable);
-    for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
+    resetCfgButton->setEnabled(enable);
+    outputCOMBox->setEnabled(enable);
+    countChnSpinBox->setEnabled(enable);
+    for (int i = 0; i < countChnSpinBox->value(); i ++)
     {
         dataSrcBox[i]->setEnabled(enable);
         inputCOMBox[i]->setEnabled(enable);
@@ -205,13 +208,44 @@ void MainWindow::init()
 
     layoutTabWidget();
     initConfig();
-    showData(ui->channelTab->count()-1);
-    inputCOMBox[ui->channelTab->count()-1]->updateCOMList();
+    showData(channelTab->count()-1);
+    inputCOMBox[channelTab->count()-1]->updateCOMList();
 }
 
 //选项卡的布局
 void MainWindow::layoutTabWidget()
-{
+{    
+    countChannel = new QLabel(QStringLiteral("通道数目"));
+    outputCOMLabel = new QLabel(QStringLiteral("输出端口"));
+    countChnSpinBox = new QSpinBox();
+
+    countChnSpinBox->setRange(1, 8);
+    countChnSpinBox->setValue(1);
+
+    startButton = new QPushButton(QStringLiteral(" 开  始 "));
+    saveCfgButton = new QPushButton(QStringLiteral("保存配置"));
+    resetCfgButton = new QPushButton(QStringLiteral("重置配置"));
+    outputCOMBox = new ComboBox();
+
+    countChnLayout = new QHBoxLayout();
+    outputCOMLayout = new QVBoxLayout();
+    leftLayout = new QVBoxLayout();
+    mainLayout = new QHBoxLayout();
+
+    countChnLayout->addWidget(countChannel);\
+    countChnLayout->addWidget(countChnSpinBox);
+
+    outputCOMLayout->addWidget(outputCOMLabel);
+    outputCOMLayout->addWidget(outputCOMBox);
+
+    leftLayout->addLayout(countChnLayout);
+    leftLayout->addWidget(startButton);
+    leftLayout->addWidget(saveCfgButton);
+    leftLayout->addWidget(resetCfgButton);
+    leftLayout->addLayout(outputCOMLayout);
+
+    channelTab = new QTabWidget();
+
     for(int i =  0; i < CHANNELMAX; i ++)
     {
         dataSrcLabel[i] = new QLabel(QStringLiteral("数据来源"));
@@ -276,26 +310,28 @@ void MainWindow::layoutTabWidget()
         connect(dataSrcBox[i], SIGNAL(currentIndexChanged(int)), this, SLOT(showInterface()));
 //        connect(inputCOMBox[i], SIGNAL(clicked()), inputCOMBox[i], SLOT(updateCOMList()));
     }
+    mainLayout->addLayout(leftLayout);
+    mainLayout->addWidget(channelTab);
+
     outData = new OutputData;
-    for (int j = 0; j < 20; j ++)
-        ui->outPutPortComboBox->addItem(QString("COM%1").arg(j+1));
-    for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
-        ui->channelTab->addTab(tab[i], QStringLiteral("通道%1").arg(i+1));
+    outputCOMBox->updateCOMList();
+    for (int i = 0; i < countChnSpinBox->value(); i ++)
+        channelTab->addTab(tab[i], QStringLiteral("通道%1").arg(i+1));
 }
 
 //界面显示
 void MainWindow::display()
 {
-    if (ui->channelTab->count() < ui->countChnSpinBox->value())
+    if (channelTab->count() < countChnSpinBox->value())
     {
-        for (int i = ui->channelTab->count(); i <= ui->countChnSpinBox->value(); i ++)
+        for (int i = channelTab->count(); i <= countChnSpinBox->value(); i ++)
         {
-            ui->channelTab->addTab(tab[i-1],QStringLiteral("通道%1").arg(i));
+            channelTab->addTab(tab[i-1],QStringLiteral("通道%1").arg(i));
         }
-    } else if (ui->channelTab->count() > ui->countChnSpinBox->value()) {
-        while(ui->channelTab->count() > ui->countChnSpinBox->value())
+    } else if (channelTab->count() > countChnSpinBox->value()) {
+        while(channelTab->count() > countChnSpinBox->value())
         {
-            ui->channelTab->removeTab(ui->channelTab->count()-1);
+            channelTab->removeTab(channelTab->count()-1);
         }
     }
 }
@@ -308,10 +344,10 @@ void MainWindow::initConfig()
     } else {
         config = new QSettings("defaultConfig.ini", QSettings::IniFormat);
     }
-    ui->countChnSpinBox->setValue(config->value("main/channelCount").toInt());
-    ui->outPutPortComboBox->setCurrentText(config->value("main/outputCOM").toString());
+    countChnSpinBox->setValue(config->value("main/channelCount").toInt());
+    outputCOMBox->setCurrentText(config->value("main/outputCOM").toString());
 
-    for (int i = 0; i < ui->countChnSpinBox->text().toInt(); i ++)
+    for (int i = 0; i < countChnSpinBox->text().toInt(); i ++)
     {
         dataSrcBox[i]->setCurrentIndex(config->value(QString("channel-%1/dataSrc").arg(i+1)).toInt());
         inputCOMBox[i]->setCurrentText(config->value(QString("channel-%1/inputCOM").arg(i+1)).toString());
@@ -325,9 +361,9 @@ void MainWindow::checkCOMConflict()
 {
     if( true == runFlag)
     {
-        for (int i = 0; i < ui->countChnSpinBox->value(); i ++)
+        for (int i = 0; i < countChnSpinBox->value(); i ++)
         {
-            if (ui->outPutPortComboBox->currentText() == inputCOMBox[i]->currentText().mid(0,(inputCOMBox[i]->currentText().indexOf('('))))
+            if (outputCOMBox->currentText() == inputCOMBox[i]->currentText())
             {
                 conflictCOM = true;
                 break;
