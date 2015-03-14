@@ -88,6 +88,7 @@ void MainWindow::on_countChnSpinBox_valueChanged(int)
 {
     display();
     showData(ui->channelTab->count()-1);
+    inputCOMBox[ui->channelTab->count()-1]->updateCOMList();
 }
 
 //点击开始按钮，开始或停止数据采集
@@ -205,6 +206,7 @@ void MainWindow::init()
     layoutTabWidget();
     initConfig();
     showData(ui->channelTab->count()-1);
+    inputCOMBox[ui->channelTab->count()-1]->updateCOMList();
 }
 
 //选项卡的布局

@@ -24,10 +24,11 @@ private:
     //获取可用串口的名称
     QString getCOMName(int idx, QString para);
 
+    bool event(QEvent *event);
+
+public:
     //更新串口列表
     void updateCOMList();
-
-    bool event(QEvent *event);
 
 private:
     //注册表中串口路径
