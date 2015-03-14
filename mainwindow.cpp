@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     init();
     widget->setLayout(mainLayout);
     setCentralWidget(widget);
+    resize(300, 170);
 }
 
 MainWindow::~MainWindow()
