@@ -52,7 +52,7 @@ MainWindow::~MainWindow()
 }
 
 //保存配置(将用户当前配置保存到自定义配置文件中)
-void MainWindow::on_saveCfgButton_clicked()
+void MainWindow::saveCfg()
 {
     customConfig = new QSettings("customConfig.txt", QSettings::IniFormat);
     customConfig->setValue("main/channelCount", countChnSpinBox->text());
@@ -71,7 +71,7 @@ void MainWindow::on_saveCfgButton_clicked()
 }
 
 //重置配置(从出厂配置文件中读取初始化数值)
-void MainWindow::on_resetConfigButton_clicked()
+void MainWindow::resetCfg()
 {
     defaultConfig = new QSettings("defaultConfig.txt", QSettings::IniFormat);
     countChnSpinBox->setValue(defaultConfig->value("main/channelCount").toInt());
@@ -88,7 +88,7 @@ void MainWindow::on_resetConfigButton_clicked()
 }
 
 //通道数目改变时，触发窗口显示改变
-void MainWindow::on_countChnSpinBox_valueChanged(int)
+void MainWindow::changeChnTab(int)
 {
     display();
     showData(channelTab->count()-1);
@@ -96,7 +96,7 @@ void MainWindow::on_countChnSpinBox_valueChanged(int)
 }
 
 //点击开始按钮，开始或停止数据采集
-void MainWindow::on_startButton_clicked()
+void MainWindow::start()
 {
     runFlag = !runFlag;
     checkCOMConflict();
@@ -211,6 +211,11 @@ void MainWindow::init()
     initConfig();
     showData(channelTab->count()-1);
     inputCOMBox[channelTab->count()-1]->updateCOMList();
+
+    connect(saveCfgButton, SIGNAL(clicked()), this, SLOT(saveCfg()));
+    connect(resetCfgButton, SIGNAL(clicked()), this, SLOT(resetCfg()));
+    connect(countChnSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeChnTab(int)));
+    connect(startButton, SIGNAL(clicked()), this, SLOT(start()));
 }
 
 //选项卡的布局

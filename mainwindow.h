@@ -44,16 +44,16 @@ public:
 
 private slots:
     //保存配置(将用户当前配置保存到自定义配置文件中)
-    void on_saveCfgButton_clicked();
+    void saveCfg();
 
     //重置配置(从出厂配置文件中读取初始化数值)
-    void on_resetConfigButton_clicked();
+    void resetCfg();
 
     //通道数目改变时，触发窗口显示改变
-    void on_countChnSpinBox_valueChanged(int);
+    void changeChnTab(int);
 
     //点击开始按钮，开始或停止数据采集
-    void on_startButton_clicked();
+    void start();
 
     //将输入通道的数据组合
     void handleData();
