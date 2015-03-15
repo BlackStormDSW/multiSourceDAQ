@@ -8,7 +8,6 @@
 #include "inputdata.h"
 #include "dataprotocol.h"
 #include <QtMath>
-#include <QDebug>
 
 InputData::InputData()
 {
@@ -47,14 +46,12 @@ void InputData::initGDMData()
 void InputData::readInputData()
 {
     inputBuf = inputDataCOM->readAll();
-//    qDebug() << " data: " << inputBuf.toHex();
     updateInputData(inputDataCOM, inputBuf.toHex());
 }
 
 //向数字万用表发送指令
 void InputData::sendGDMData(Win_QextSerialPort *GDMCOM, QByteArray hexStr)
 {
-//    qDebug() << "sendGDMData: " << hexStr.data();
     GDMCOM->write(hexStr, hexStr.length());
 }
 
@@ -86,16 +83,13 @@ void InputData::updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr)
 {
     if (!hexStr.isEmpty())
     {
-//        qDebug() << QString("valueFlag:%1, beginFlag:%2").arg(valueFlag).arg(beginFlag);
-
         if(QStringLiteral("三和数显指示表") == dataSrc)
         {
-//            qDebug() << "Hex str: " << hexStr.mid(0,2);
             if ("aa" == hexStr.mid(0,2) || "AA" == hexStr.mid(0,2))
             {
                 index = 0;
                 dataTmp = 0.0;
-            } else {
+            } else if (10 > index) {
                 if (3 > index)
                 {
                     dataTmp += hexStr.mid(0, 2).toDouble() * qPow(10, -4 + 2*index);
@@ -109,8 +103,9 @@ void InputData::updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr)
                         dataValue = dataTmp;
                 }
                 ++ index;
+            } else {
+                dataValue = 0;
             }
-//            qDebug() << "updateInputData data value : " << dataValue;
         }
         else //(QStringLiteral("固纬数字万用表") == dataSrc)
         {
@@ -124,19 +119,15 @@ void InputData::updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr)
                 if (false == beginFlag)
                 {
                     sendGDMData(dataCOM, GDM_connect_cmd1.data());
-//                    qDebug() << "GDM_connect_cmd1:" << GDM_connect_cmd1.data();
                 }
                 if (!qstrncmp(GDM_connect_response1.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_connect_response1.data())-1))
                 {
                     beginFlag = true;
                     sendGDMData(dataCOM, GDM_connect_cmd2.data());
-//                    qDebug() << "GDM_connect_cmd2: " << GDM_connect_cmd2.data();
                 } else if (!qstrncmp(GDM_connect_response2.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_connect_response2.data())-1)) {
-//                    qDebug() << "GDM_connect_response2: " << GDM_connect_response2.data();
                     sendGDMData(dataCOM, GDM_connect_done.data());
                 } else if (!qstrncmp(GDM_connect_done_response.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_connect_done_response.data())-1)){
                     valueFlag = true;
-//                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
                     if (!adcValue.compare(QString("DCV")))
                         sendGDMData(dataCOM, GDM_switchto_dcv.data());
                     else if (!adcValue.compare(QString("ACV")))
@@ -144,14 +135,11 @@ void InputData::updateInputData(Win_QextSerialPort *dataCOM, QByteArray hexStr)
                     sendGDMData(dataCOM, GDM_get_data.data());
                 } else if (!qstrncmp(GDM_switchto_dcv_done.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_switchto_dcv_done.data())-1)) {
                     valueFlag = true;
-//                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
                     sendGDMData(dataCOM, GDM_get_data.data());
                 } else if (!qstrncmp(GDM_switchto_acv_done.data(), QByteArray::fromHex(hexStr).data(), qstrlen(GDM_switchto_acv_done.data())-1)) {
                     valueFlag = true;
-//                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
                     sendGDMData(dataCOM, GDM_get_data.data());
                 } else {
-//                    qDebug() << "GDM_get_data: " << GDM_get_data.data();
                     sendGDMData(dataCOM, GDM_get_data.data());
                 }
             }
@@ -233,13 +221,10 @@ void InputData::runGDM(QString adc)
 //切换数字万用表的交流/直流
 void InputData::changADC(QString adc)
 {
-    qDebug() << "adc: " << adc;
     if (!adc.compare("ACV"))
     {
-        qDebug() << "ACV";
         sendGDMData(inputDataCOM, GDM_switchto_acv.data());
     } else if (!adc.compare("DCV")) {
-        qDebug() << "DCV";
         sendGDMData(inputDataCOM, GDM_switchto_dcv.data());
     }
 }

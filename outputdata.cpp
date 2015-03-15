@@ -7,7 +7,6 @@
 
 #include "outputdata.h"
 #include "dataprotocol.h"
-#include <QDebug>
 
 OutputData::OutputData()
 {

@@ -9,7 +9,6 @@
 #include "WinReg.h"
 #include <QMouseEvent>
 #include <QStringListIterator>
-#include <QDebug>
 
 ComboBox::ComboBox()
 {
@@ -32,7 +31,7 @@ QString ComboBox::getCOMName(int idx, QString para)
     if(0 != ::RegOpenKeyEx(HKEY_LOCAL_MACHINE, subKey, 0, KEY_READ|KEY_QUERY_VALUE, &hKey))
     {
         QString error = "Cannot open regedit!";
-        qDebug() << error;
+        return error;
     }
 
     QString keyMessage = "";    //键名
@@ -46,11 +45,6 @@ QString ComboBox::getCOMName(int idx, QString para)
 
     if(0 == ::RegEnumValue(hKey, indexNum, keyName, &keySize, 0, &type, (BYTE *)keyValue, &valueSize))
     {
-
-        qDebug() << "key size : " << keySize;
-        qDebug() << "value : " << keyValue;
-        qDebug() << "value size : " << valueSize;
-        qDebug() << "index num : " << indexNum;
         //读取键名
         for (DWORD i = 0; i < keySize; i ++)
         {
@@ -64,12 +58,10 @@ QString ComboBox::getCOMName(int idx, QString para)
             {
                 value = keyValue[j];
                 valueMesage.append(value);
+            } else {
+                break;
             }
         }
-
-        qDebug() << "key Name: " << QString::fromStdWString(keyName);
-        qDebug() << "key Name: " << keyMessage;
-        qDebug() << "key Value: " << valueMesage;
 
         if ("key" == para)
         {
@@ -94,11 +86,8 @@ void ComboBox::updateCOMList()
 {
     this->clear();
     key = serialSettings->allKeys();
-    qDebug() << "key size ::::::: " << key.size();
     for (int i = 0; i < key.size(); i ++)
     {
-        qDebug() << "size of the item " << getCOMName(i, "value")
-                 << " is :" << getCOMName(i, "value").length();
         this->addItem(getCOMName(i, "value"));
     }
 }

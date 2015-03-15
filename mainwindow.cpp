@@ -26,7 +26,6 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QTimer>
-#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -119,7 +118,7 @@ void MainWindow::start()
                     inData[i]->runGDM(ADCSwitchBox[i]->currentText());
                 }
             }
-            outData->setCOMName(outputCOMBox->currentText());
+            outData->setCOMName(outputCOMBox->currentText().mid(0,(outputCOMBox->currentText().indexOf('('))));
             outData->initOutputCOM();
             timer->start(INTERVAL);
         } else {
@@ -153,7 +152,6 @@ void MainWindow::handleData()
         valueDisplay[i]->setText(dataStr);
     }
     sendBuf.append("E");
-    //    qDebug() << "the result: " << sendBuf.data();
     outData->setData(sendBuf);
 }
 
