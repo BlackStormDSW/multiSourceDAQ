@@ -38,16 +38,11 @@ MainWindow::MainWindow(QWidget *parent) :
     widget->setLayout(mainLayout);
     setCentralWidget(widget);
     resize(300, 170);
+    setFixedSize(this->width(), this->height());
 }
 
 MainWindow::~MainWindow()
 {
-//    for (int i = 0; i < CHANNELMAX; i ++)
-//    {
-//        delete inData[i];
-//    }
-//    delete outData;
-//    delete ui;
 }
 
 //保存配置(将用户当前配置保存到自定义配置文件中)
