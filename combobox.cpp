@@ -37,6 +37,7 @@ QString ComboBox::getCOMName(int idx, QString para)
 
     QString keyMessage = "";    //键名
     QString message = "";
+    QString value = "";
     QString valueMesage = "";   //键值
     indexNum = idx;             //要读取键值的索引号
 
@@ -45,20 +46,30 @@ QString ComboBox::getCOMName(int idx, QString para)
 
     if(0 == ::RegEnumValue(hKey, indexNum, keyName, &keySize, 0, &type, (BYTE *)keyValue, &valueSize))
     {
+
+        qDebug() << "key size : " << keySize;
+        qDebug() << "value : " << keyValue;
+        qDebug() << "value size : " << valueSize;
+        qDebug() << "index num : " << indexNum;
         //读取键名
-        for (int i = 0; i < keySize; i ++)
+        for (DWORD i = 0; i < keySize; i ++)
         {
-            message = QString::fromStdWString(keyName);
+            message = keyName[i];
             keyMessage.append(message);
         }
         //读取键值
-        for (int j = 0; j < valueSize; j ++)
+        for (DWORD j = 0; j < valueSize; j ++)
         {
             if (0x00 != keyValue[j])
             {
-                valueMesage.append(keyValue[j]);
+                value = keyValue[j];
+                valueMesage.append(value);
             }
         }
+
+        qDebug() << "key Name: " << QString::fromStdWString(keyName);
+        qDebug() << "key Name: " << keyMessage;
+        qDebug() << "key Value: " << valueMesage;
 
         if ("key" == para)
         {
@@ -83,8 +94,11 @@ void ComboBox::updateCOMList()
 {
     this->clear();
     key = serialSettings->allKeys();
+    qDebug() << "key size ::::::: " << key.size();
     for (int i = 0; i < key.size(); i ++)
     {
+        qDebug() << "size of the item " << getCOMName(i, "value")
+                 << " is :" << getCOMName(i, "value").length();
         this->addItem(getCOMName(i, "value"));
     }
 }
